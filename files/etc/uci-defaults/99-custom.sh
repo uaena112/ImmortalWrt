@@ -51,9 +51,11 @@ case "$board_name" in
         echo "Using $board_name mapping: WAN=$wan_ifname LAN=$lan_ifnames" >>"$LOGFILE"
         ;;
     *)
-        # 默认第一个接口为WAN，其余为LAN
-        wan_ifname=$(echo "$ifnames" | awk '{print $1}')
-        lan_ifnames=$(echo "$ifnames" | cut -d ' ' -f2-)
+        # 注释掉的是默认第一个接口为WAN，其余为LAN，启用的是默认第二个接口为WAN，第一个为LAN
+        wan_ifname=$(echo "$ifnames" | awk '{print $2}')
+        lan_ifnames=$(echo "$ifnames" | awk '{print $1}')
+        #wan_ifname=$(echo "$ifnames" | awk '{print $1}')
+        #lan_ifnames=$(echo "$ifnames" | cut -d ' ' -f2-)
         echo "Using default mapping: WAN=$wan_ifname LAN=$lan_ifnames" >>"$LOGFILE"
         ;;
 esac
@@ -75,9 +77,9 @@ elif [ "$count" -gt 1 ]; then
     uci set network.wan.proto='dhcp'
 
     # 配置WAN6
-    uci set network.wan6=interface
-    uci set network.wan6.device="$wan_ifname"
-    uci set network.wan6.proto='dhcpv6'
+    #uci set network.wan6=interface
+    #uci set network.wan6.device="$wan_ifname"
+    #uci set network.wan6.proto='dhcpv6'
 
     # 查找 br-lan 设备 section
     section=$(uci show network | awk -F '[.=]' '/\.@?device\[\d+\]\.name=.br-lan.$/ {print $2; exit}')
@@ -135,9 +137,9 @@ uci set dropbear.@dropbear[0].Interface=''
 uci commit
 
 # 设置编译作者信息
-FILE_PATH="/etc/openwrt_release"
-NEW_DESCRIPTION="Packaged by wukongdaily"
-sed -i "s/DISTRIB_DESCRIPTION='[^']*'/DISTRIB_DESCRIPTION='$NEW_DESCRIPTION'/" "$FILE_PATH"
+#FILE_PATH="/etc/openwrt_release"
+#NEW_DESCRIPTION="Packaged by wukongdaily"
+#sed -i "s/DISTRIB_DESCRIPTION='[^']*'/DISTRIB_DESCRIPTION='$NEW_DESCRIPTION'/" "$FILE_PATH"
 
 # 若luci-app-advancedplus (进阶设置)已安装 则去除zsh的调用 防止命令行报 /usb/bin/zsh: not found的提示
 if [ -f /usr/lib/lua/luci/controller/advancedplus.lua ]; then
